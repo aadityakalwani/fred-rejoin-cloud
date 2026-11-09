@@ -8,7 +8,7 @@ Cloud backup watcher that keeps the Fireflies bot (Fred) in "Tutoring *" lessons
 - Fireflies' own calendar auto-join is the primary path. This is the backup.
 
 ## Cloud mode (sweep)
-GitHub cron can run 5 to 15 minutes late. So cloud mode checks EVERY lesson in progress (start+1 min until end), not narrow minute slots. A late run still rescues the lesson.
+cron-job.org (job 8822744) dispatches the workflow every 2 minutes; the GitHub schedule is a fallback. Rescue starts 2 min after a lesson starts (Aadi 9 Nov 2026: a duplicate Fred beats none, but still keep it to one). So cloud mode checks EVERY lesson in progress (start+1 min until end), not narrow minute slots. A late run still rescues the lesson.
 It keeps no state file. Fireflies is the source of truth:
 - Fred already in the room: nothing to do.
 - A recording of the room began under 4 minutes ago: Fred is joining, wait.
