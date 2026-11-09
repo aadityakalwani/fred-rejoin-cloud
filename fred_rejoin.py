@@ -10,7 +10,7 @@ not re-added within 4 min. No re-add when our last add ended as a Fireflies sile
 or when the same attendees are live with Fred in another Tutoring room (back-to-back overrun).
 Flags: --live (else DRY-RUN), --now ISO (test), --probe, --selftest.
 Cloud mode (env GITHUB_ACTIONS or flag --sweep): stateless. Every run checks EVERY lesson in
-progress (start+7 min to end), so a delayed cron still rescues it. Fireflies (active_meetings and
+progress (start+2 min to end), so a delayed cron still rescues it. Fireflies (active_meetings and
 today's transcripts) is the source of truth: no local state file. Secrets from env
 FRED_SA_JSON (service-account JSON text) and FIREFLIES_API_KEY.
 Key: env FIREFLIES_API_KEY or ~/.config/fred-rejoin/fireflies.key. No key = log + exit 0.
@@ -52,8 +52,9 @@ def gql(query, variables=None):
 
 
 def sweep_due(age, dur):
-    """Cloud sweep: any lesson in progress, from 7 min after start until it ends (Fireflies auto-join needs ~4 min)."""
-    return 7 <= age < dur
+    """Cloud sweep: any lesson in progress, from 2 min after start until it ends.
+    Aadi 9 Nov 2026: a duplicate Fred beats no Fred, so rescue early and accept the odd double."""
+    return 2 <= age < dur
 
 
 def recent_join(link, trs, now):
@@ -140,7 +141,7 @@ def selftest():
     assert skip_reason(s2["link"], att, 0, [s1, s2], {"ddd-eeee-fff"}, [], now) is None
     replay = [dict(live[0], date=ts(5, 30) * 1000, duration=93.3, meeting_link=s1["link"])]  # S1 overran to 07:03
     assert "same attendees" in skip_reason(s2["link"], att, 0, [s1, s2], set(), replay, now)
-    assert not sweep_due(0.5, 60) and not sweep_due(5, 60) and sweep_due(7, 60) and sweep_due(17, 60) and sweep_due(59.9, 60) and not sweep_due(60, 60)
+    assert not sweep_due(0.5, 60) and not sweep_due(1.9, 60) and sweep_due(2, 60) and sweep_due(5, 60) and sweep_due(7, 60) and sweep_due(17, 60) and sweep_due(59.9, 60) and not sweep_due(60, 60)
     assert sweep_due(14, 60)                                   # a 14 min late cron still rescues the lesson
     rj = [{"date": ts(6, 57) * 1000, "meeting_link": s2["link"]}]
     assert recent_join(s2["link"], rj, now) and not recent_join(s1["link"], rj, now)
