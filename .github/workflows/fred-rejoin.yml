@@ -1,0 +1,27 @@
+name: fred-rejoin
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+concurrency:
+  group: fred-rejoin
+  cancel-in-progress: false
+jobs:
+  rejoin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TZ: Europe/London
+      FRED_SA_JSON: ${{ secrets.FRED_SA_JSON }}
+      FIREFLIES_API_KEY: ${{ secrets.FIREFLIES_API_KEY }}
+      FRED_CAL: ${{ secrets.FRED_CAL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python fred_rejoin.py --selftest
+      - run: python fred_rejoin.py --live
